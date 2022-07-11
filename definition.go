@@ -345,6 +345,8 @@ type Object struct {
 	fields                FieldDefinitionMap
 	initialisedInterfaces bool
 	interfaces            []*Interface
+	directives            []*ObjectDirective
+	extend                bool
 	// Interim alternative to throwing an error during schema definition at run-time
 	err error
 }
@@ -368,12 +370,23 @@ type IsTypeOfFn func(p IsTypeOfParams) bool
 
 type InterfacesThunk func() []*Interface
 
+type ObjectDirectiveArg struct {
+	Name  string
+	Value interface{}
+}
+type ObjectDirective struct {
+	Directive *Directive
+	Args      []ObjectDirectiveArg
+}
+
 type ObjectConfig struct {
-	Name        string      `json:"name"`
-	Interfaces  interface{} `json:"interfaces"`
-	Fields      interface{} `json:"fields"`
-	IsTypeOf    IsTypeOfFn  `json:"isTypeOf"`
-	Description string      `json:"description"`
+	Name        string             `json:"name"`
+	Interfaces  interface{}        `json:"interfaces"`
+	Fields      interface{}        `json:"fields"`
+	IsTypeOf    IsTypeOfFn         `json:"isTypeOf"`
+	Description string             `json:"description"`
+	Directives  []*ObjectDirective `json:"directive"`
+	Extend      bool               `json:"extend"`
 }
 
 type FieldsThunk func() Fields
@@ -396,6 +409,8 @@ func NewObject(config ObjectConfig) *Object {
 	objectType.PrivateDescription = config.Description
 	objectType.IsTypeOf = config.IsTypeOf
 	objectType.typeConfig = config
+	objectType.directives = config.Directives
+	objectType.extend = config.Extend
 
 	return objectType
 }
@@ -463,6 +478,14 @@ func (gt *Object) Interfaces() []*Interface {
 	gt.interfaces, gt.err = defineInterfaces(gt, configInterfaces)
 	gt.initialisedInterfaces = true
 	return gt.interfaces
+}
+
+func (gt *Object) Directives() []*ObjectDirective {
+	return gt.directives
+}
+
+func (gt *Object) IsExtend() bool {
+	return gt.extend
 }
 
 func (gt *Object) Error() error {
