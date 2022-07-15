@@ -1,7 +1,9 @@
 package graphql
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"math"
 	"strconv"
 	"time"
@@ -142,6 +144,10 @@ func coerceInt(value interface{}) interface{} {
 			return nil
 		}
 		return coerceInt(*value)
+	case json.Number:
+		if i64, err := value.Int64(); err == nil {
+			return i64
+		}
 	}
 
 	// If the value cannot be transformed into an int, return nil instead of '0'
@@ -274,6 +280,18 @@ func coerceFloat(value interface{}) interface{} {
 			return nil
 		}
 		return coerceFloat(*value)
+	case json.Number:
+		if f64, err := value.Float64(); err == nil {
+			return f64
+		} else {
+			log.Printf("Float64 %v", err)
+		}
+	case *json.Number:
+		if f64, err := value.Float64(); err == nil {
+			return f64
+		} else {
+			log.Printf("Float64 %v", err)
+		}
 	}
 
 	// If the value cannot be transformed into an float, return nil instead of '0.0'
