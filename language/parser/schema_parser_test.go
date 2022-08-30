@@ -121,6 +121,60 @@ extend type Hello {
 	}
 }
 
+func TestSchemaParser_Directives(t *testing.T) {
+
+	body := `
+type Hello {
+  world: String @external
+}`
+	astDoc := parse(t, body)
+	expected := ast.NewDocument(&ast.Document{
+		Loc: testLoc(1, 41),
+		Definitions: []ast.Node{
+			ast.NewObjectDefinition(&ast.ObjectDefinition{
+				Loc: testLoc(1, 41),
+				Name: ast.NewName(&ast.Name{
+					Value: "Hello",
+					Loc:   testLoc(6, 11),
+				}),
+				Interfaces: []*ast.Named{},
+				Fields: []*ast.FieldDefinition{
+					ast.NewFieldDefinition(&ast.FieldDefinition{
+						Loc: testLoc(16, 39),
+						Name: ast.NewName(&ast.Name{
+							Loc:   testLoc(16, 21),
+							Value: "world",
+						}),
+						Directives: []*ast.Directive{
+							ast.NewDirective(&ast.Directive{
+								Name: ast.NewName(&ast.Name{
+									Value: "external",
+									Loc:   testLoc(31, 39),
+								}),
+								Arguments: []*ast.Argument{},
+								Loc:       testLoc(30, 39),
+							}),
+						},
+						Arguments: []*ast.InputValueDefinition{},
+						Type: ast.NewNamed(&ast.Named{
+							Loc: testLoc(23, 29),
+							Name: ast.NewName(&ast.Name{
+								Value: "String",
+								Loc:   testLoc(23, 29),
+							}),
+						}),
+					}),
+				},
+				Directives: []*ast.Directive{},
+			}),
+		},
+	})
+
+	if !reflect.DeepEqual(astDoc, expected) {
+		t.Fatalf("unexpected document, expected: %v, got: %v", expected, astDoc)
+	}
+}
+
 func TestSchemaParser_SimpleNonNullType(t *testing.T) {
 
 	body := `

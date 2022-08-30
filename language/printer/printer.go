@@ -878,14 +878,23 @@ var printDocASTReducer = map[string]visitor.VisitFunc{
 		return visitor.ActionNoChange, nil
 	},
 	"TypeExtensionDefinition": func(p visitor.VisitFuncParams) (string, interface{}) {
+		commentDelim := `"""`
+		addExtension := func(definition string) string {
+			if strings.HasPrefix(definition, commentDelim) {
+				if sp := strings.Split(definition, commentDelim); len(sp) >= 3 {
+					return commentDelim + sp[1] + commentDelim + "\nextend " + strings.TrimLeft(strings.Join(sp[2:], commentDelim), "\n")
+				}
+			}
+			return "extend " + definition
+		}
 		switch node := p.Node.(type) {
 		case *ast.TypeExtensionDefinition:
 			definition := fmt.Sprintf("%v", node.Definition)
-			str := "extend " + definition
+			str := addExtension(definition)
 			return visitor.ActionUpdate, str
 		case map[string]interface{}:
 			definition := getMapValueString(node, "Definition")
-			str := "extend " + definition
+			str := addExtension(definition)
 			return visitor.ActionUpdate, str
 		}
 		return visitor.ActionNoChange, nil

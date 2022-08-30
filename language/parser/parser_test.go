@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"reflect"
 	"strings"
 	"testing"
@@ -594,7 +595,7 @@ func TestDefinitionsWithDescriptions(t *testing.T) {
 				t.Fatal("no document was returned")
 			}
 			for _, def := range doc.Definitions {
-				fmt.Printf("%#v\n", def)
+				log.Printf("%#v\n", def)
 			}
 			if node, ok := doc.Definitions[0].(ast.DescribableNode); !ok {
 				t.Fatalf("unexpected node received %#v", doc.Definitions[0])

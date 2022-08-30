@@ -434,7 +434,7 @@ func (gt *Object) Name() string {
 	return gt.PrivateName
 }
 func (gt *Object) Description() string {
-	return ""
+	return gt.PrivateDescription
 }
 func (gt *Object) String() string {
 	return gt.PrivateName
@@ -559,6 +559,7 @@ func defineFieldMap(ttype Named, fieldMap Fields) (FieldDefinitionMap, error) {
 			Resolve:           field.Resolve,
 			Subscribe:         field.Subscribe,
 			DeprecationReason: field.DeprecationReason,
+			Directives:        field.Directives,
 		}
 
 		fieldDef.Args = []*Argument{}
@@ -629,6 +630,7 @@ type Field struct {
 	Name              string              `json:"name"` // used by graphlql-relay
 	Type              Output              `json:"type"`
 	Args              FieldConfigArgument `json:"args"`
+	Directives        FieldDirectives     `json:"directives"`
 	Resolve           FieldResolveFn      `json:"-"`
 	Subscribe         FieldResolveFn      `json:"-"`
 	DeprecationReason string              `json:"deprecationReason"`
@@ -636,6 +638,7 @@ type Field struct {
 }
 
 type FieldConfigArgument map[string]*ArgumentConfig
+type FieldDirectives []*ObjectDirective
 
 type ArgumentConfig struct {
 	Type         Input       `json:"type"`
@@ -645,13 +648,14 @@ type ArgumentConfig struct {
 
 type FieldDefinitionMap map[string]*FieldDefinition
 type FieldDefinition struct {
-	Name              string         `json:"name"`
-	Description       string         `json:"description"`
-	Type              Output         `json:"type"`
-	Args              []*Argument    `json:"args"`
-	Resolve           FieldResolveFn `json:"-"`
-	Subscribe         FieldResolveFn `json:"-"`
-	DeprecationReason string         `json:"deprecationReason"`
+	Name              string          `json:"name"`
+	Description       string          `json:"description"`
+	Type              Output          `json:"type"`
+	Args              []*Argument     `json:"args"`
+	Resolve           FieldResolveFn  `json:"-"`
+	Subscribe         FieldResolveFn  `json:"-"`
+	DeprecationReason string          `json:"deprecationReason"`
+	Directives        FieldDirectives `json:"directives"`
 }
 
 type FieldArgument struct {
