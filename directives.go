@@ -233,7 +233,7 @@ var LinkDirective = NewDirective(DirectiveConfig{
 			Type: Link__Purpose,
 		},
 		"import": &ArgumentConfig{
-			Type: NewList(link__Import),
+			Type: NewList(linkImport),
 		},
 	},
 })

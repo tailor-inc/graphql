@@ -590,13 +590,22 @@ var DateTime = NewScalar(ScalarConfig{
 var Any = NewScalar(ScalarConfig{
 	Name:        "_Any",
 	Description: "A new scalar called _Any must be created. The _Any scalar is used to pass representations of entities from external services into the root _entities field for execution. Validation of the _Any scalar is done by matching the __typename and @external fields defined in the schema.",
+	Serialize: func(value interface{}) interface{} {
+		return nil
+	},
 })
 
 var FieldSet = NewScalar(ScalarConfig{
 	Name:        "FieldSet",
 	Description: "A new scalar called FieldSet is a custom scalar type that is used to represent a set of fields.",
+	Serialize: func(value interface{}) interface{} {
+		return nil
+	},
 })
 
-var link__Import = NewScalar(ScalarConfig{
+var linkImport = NewScalar(ScalarConfig{
 	Name: "link__Import",
+	Serialize: func(value interface{}) interface{} {
+		return nil
+	},
 })
