@@ -3,7 +3,6 @@ package parser
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"reflect"
 	"strings"
 	"testing"
@@ -390,6 +389,19 @@ func TestAllowsNonKeywordsAnywhereNameIsAllowed(t *testing.T) {
 	}
 }
 
+func TestTypeExtenstion(t *testing.T) {
+	source := `
+      """ Foo """
+      extend type Foo {
+      	foo: String!
+      }
+    `
+	_, err := Parse(ParseParams{Source: source})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
 func TestParsesExperimentalSubscriptionFeature(t *testing.T) {
 	source := `
       subscription Foo {
@@ -574,6 +586,18 @@ func TestDefinitionsWithDescriptions(t *testing.T) {
 			expectedComment: "★ Foo ★",
 		},
 		{
+			name: "object with extend",
+			source: `
+				"""
+				★ ExtendVar ★
+				"""
+				extend type Var implements Bar {
+					foo: String!
+				}
+			`,
+			expectedComment: "★ ExtendVar ★",
+		},
+		{
 			name: "scalar",
 			source: `
 				"""
@@ -594,17 +618,26 @@ func TestDefinitionsWithDescriptions(t *testing.T) {
 			if doc == nil {
 				t.Fatal("no document was returned")
 			}
-			for _, def := range doc.Definitions {
-				log.Printf("%#v\n", def)
-			}
-			if node, ok := doc.Definitions[0].(ast.DescribableNode); !ok {
+			switch node := doc.Definitions[0].(type) {
+			case ast.DescribableNode:
+				if node.GetDescription().Value != tc.expectedComment {
+					t.Fatalf(
+						"parsed description '%s' does not match '%s'",
+						node.GetDescription().Value,
+						tc.expectedComment,
+					)
+				}
+			case *ast.TypeExtensionDefinition:
+				node2 := node.Definition
+				if node2.GetDescription().Value != tc.expectedComment {
+					t.Fatalf(
+						"parsed description '%s' does not match '%s'",
+						node2.GetDescription().Value,
+						tc.expectedComment,
+					)
+				}
+			default:
 				t.Fatalf("unexpected node received %#v", doc.Definitions[0])
-			} else if node.GetDescription().Value != tc.expectedComment {
-				t.Fatalf(
-					"parsed description '%s' does not match '%s'",
-					node.GetDescription().Value,
-					tc.expectedComment,
-				)
 			}
 		})
 	}

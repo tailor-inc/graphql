@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-
 	"github.com/graphql-go/graphql/gqlerrors"
 	"github.com/graphql-go/graphql/language/ast"
 	"github.com/graphql-go/graphql/language/lexer"
@@ -36,7 +35,7 @@ func init() {
 		tokenDefinitionFn[lexer.UNION] = parseUnionTypeDefinition
 		tokenDefinitionFn[lexer.ENUM] = parseEnumTypeDefinition
 		tokenDefinitionFn[lexer.INPUT] = parseInputObjectTypeDefinition
-		tokenDefinitionFn[lexer.EXTEND] = parseTypeExtensionDefinition
+		tokenDefinitionFn[lexer.EXTEND] = parseObjectTypeDefinition
 		tokenDefinitionFn[lexer.DIRECTIVE] = parseDirectiveDefinition
 	}
 }
@@ -959,13 +958,31 @@ func parseScalarTypeDefinition(parser *Parser) (ast.Node, error) {
  *   Description?
  *   type Name ImplementsInterfaces? Directives? { FieldDefinition+ }
  */
+
 func parseObjectTypeDefinition(parser *Parser) (ast.Node, error) {
 	start := parser.Token.Start
 	description, err := parseDescription(parser)
-	if err != nil {
-		return nil, err
+	token := parser.Token
+	if token.Kind == lexer.NAME && token.Value == lexer.EXTEND {
+		if err = advance(parser); err != nil {
+			return nil, err
+		}
+		definition, err := parseObjectType(parser, description)
+		if err != nil {
+			return nil, err
+		}
+		return ast.NewTypeExtensionDefinition(&ast.TypeExtensionDefinition{
+			Loc:        loc(parser, start),
+			Definition: definition.(*ast.ObjectDefinition),
+		}), nil
 	}
-	_, err = expectKeyWord(parser, lexer.TYPE)
+	return parseObjectType(parser, description)
+}
+func parseObjectType(parser *Parser, description *ast.StringValue) (ast.Node, error) {
+
+	start := parser.Token.Start
+
+	_, err := expectKeyWord(parser, lexer.TYPE)
 	if err != nil {
 		return nil, err
 	}
@@ -1361,26 +1378,6 @@ func parseInputObjectTypeDefinition(parser *Parser) (ast.Node, error) {
 		Directives:  directives,
 		Loc:         loc(parser, start),
 		Fields:      fields,
-	}), nil
-}
-
-/**
- * TypeExtensionDefinition : extend ObjectTypeDefinition
- */
-func parseTypeExtensionDefinition(parser *Parser) (ast.Node, error) {
-	start := parser.Token.Start
-	_, err := expectKeyWord(parser, lexer.EXTEND)
-	if err != nil {
-		return nil, err
-	}
-
-	definition, err := parseObjectTypeDefinition(parser)
-	if err != nil {
-		return nil, err
-	}
-	return ast.NewTypeExtensionDefinition(&ast.TypeExtensionDefinition{
-		Loc:        loc(parser, start),
-		Definition: definition.(*ast.ObjectDefinition),
 	}), nil
 }
 
