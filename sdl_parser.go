@@ -166,7 +166,7 @@ func unisonResolver(p ResolveTypeParams) *Object {
 	return nil
 }
 
-func (g *GraphqlParser) astAsGraphql(nodes []ast.Node) (*Schema, error) {
+func (g *GraphqlParser) AstAsSchemaConfig(nodes []ast.Node) (*SchemaConfig, error) {
 	var hasFields []ast.Node
 	for _, def := range nodes {
 		switch o := def.(type) {
@@ -338,12 +338,7 @@ func (g *GraphqlParser) astAsGraphql(nodes []ast.Node) (*Schema, error) {
 	if subscription, ok := g.typeMap["Subscription"].(*Object); ok {
 		schemaConfig.Subscription = subscription
 	}
-
-	schema, err := NewSchema(schemaConfig)
-	if err != nil {
-		return nil, err
-	}
-	return &schema, nil
+	return &schemaConfig, nil
 }
 
 type SDLResolver func(typeName string, fieldName string) FieldResolveFn
@@ -356,6 +351,13 @@ func ParseSDL(sdl string, sdlResolver SDLResolver) (*Schema, error) {
 		return nil, err
 	}
 	g := NewGraphqlParser(sdlResolver)
-
-	return g.astAsGraphql(doc.Definitions)
+	schemaConfig, err := g.AstAsSchemaConfig(doc.Definitions)
+	if err != nil {
+		return nil, err
+	}
+	schema, err := NewSchema(*schemaConfig)
+	if err != nil {
+		return nil, err
+	}
+	return &schema, nil
 }
