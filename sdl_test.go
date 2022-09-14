@@ -151,43 +151,34 @@ func TestBuildSDL(t *testing.T) {
 	t.Run("objectAsNode", func(t *testing.T) {
 		sdl := printer.Print(objectAsNode(testType1))
 		assert.True(t, testType1.extend)
-		t.Log(sdl)
-		assert.Equal(t, sdl, `"""TestType1 desc"""
-extend type TestType1 @key(fields: "id") {
-  
-  """TestType1 string desc"""
-  str: String @external
-  enum1: Enum1
-  
-  """type1 arr[int] desc"""
-  arr: [Int]
-}`)
+		assert.Contains(t, sdl, `"""TestType1 desc"""
+extend type TestType1 @key(fields: "id") {`)
+		assert.Contains(t, sdl, `"""TestType1 string desc"""
+  str: String @external`)
+		assert.Contains(t, sdl, `enum1: Enum1`)
+		assert.Contains(t, sdl, `"""type1 arr[int] desc"""
+  arr: [Int]`)
+
 	})
 
 	t.Run("inputObjectAsNode", func(t *testing.T) {
 		sdl := printer.Print(inputObjectAsNode(inputType1))
-		assert.Equal(t, sdl, `"""type of InputType1"""
-input InputType1 {
-  
-  """inputType1 int desc"""
-  int: Int
-  
-  """inputType1 arr[int] desc"""
-  arr: [Int]
-}`)
+		assert.Contains(t, sdl, `"""type of InputType1"""
+input InputType1 {`)
+		assert.Contains(t, sdl, `"""inputType1 int desc"""
+  int: Int`)
+		assert.Contains(t, sdl, `"""inputType1 arr[int] desc"""
+  arr: [Int]`)
 	})
 
 	t.Run("enumAsNode", func(t *testing.T) {
 		sdl := printer.Print(enumAsNode(enum1))
-		assert.Equal(t, sdl, `"""enum description"""
-enum Enum1 {
-  
-  """desc val1"""
-  val1
-  
-  """desc val2"""
-  val2
-}`)
+		assert.Contains(t, sdl, `"""enum description"""
+enum Enum1 {`)
+		assert.Contains(t, sdl, `"""desc val1"""
+  val1`)
+		assert.Contains(t, sdl, `"""desc val2"""
+  val2`)
 	})
 
 	t.Run("scalarAsNode", func(t *testing.T) {
