@@ -1,4 +1,4 @@
-module github.com/graphql-go/graphql
+module github.com/tailor-inc/graphql
 
 go 1.18
 

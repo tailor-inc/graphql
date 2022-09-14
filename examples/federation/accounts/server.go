@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/graphql-go/graphql"
-	"github.com/graphql-go/graphql/playground"
+	"github.com/tailor-inc/graphql"
+	"github.com/tailor-inc/graphql/playground"
 	"log"
 	"net/http"
 )

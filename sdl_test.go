@@ -1,7 +1,7 @@
 package graphql
 
 import (
-	"github.com/graphql-go/graphql/language/printer"
+	"github.com/tailor-inc/graphql/language/printer"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

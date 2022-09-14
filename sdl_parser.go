@@ -3,8 +3,8 @@ package graphql
 import (
 	"errors"
 	"fmt"
-	"github.com/graphql-go/graphql/language/ast"
-	"github.com/graphql-go/graphql/language/parser"
+	"github.com/tailor-inc/graphql/language/ast"
+	"github.com/tailor-inc/graphql/language/parser"
 )
 
 type GraphqlParser struct {

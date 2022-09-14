@@ -1,7 +1,7 @@
 package ast
 
 import (
-	"github.com/graphql-go/graphql/language/kinds"
+	"github.com/tailor-inc/graphql/language/kinds"
 )
 
 // DescribableNode are nodes that have descriptions associated with them.

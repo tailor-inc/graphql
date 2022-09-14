@@ -1,13 +1,11 @@
 module github.com/tailor-inc/graphql/federation
-
 go 1.18
 
-replace github.com/graphql-go/graphql v0.8.0 => ../../
 
 require (
 	github.com/gobwas/ws v1.1.0
 	github.com/gorilla/mux v1.8.0
-	github.com/graphql-go/graphql v0.8.0
+	github.com/tailor-inc/graphql v0.0.1
 	github.com/jensneuse/abstractlogger v0.0.4
 	github.com/wundergraph/graphql-go-tools v1.52.1
 	go.uber.org/zap v1.23.0
