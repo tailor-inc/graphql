@@ -1,9 +1,10 @@
 package graphql
 
 import (
-	"github.com/tailor-inc/graphql/language/parser"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/tailor-inc/graphql/language/parser"
 )
 
 func TestParseSDL(t *testing.T) {
