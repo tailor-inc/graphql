@@ -7,6 +7,17 @@ import (
 	"github.com/tailor-inc/graphql/language/parser"
 )
 
+const (
+	TypeNameID       = "ID"
+	TypeNameString   = "String"
+	TypeNameBoolean  = "Boolean"
+	TypeNameBool     = "Bool"
+	TypeNameInt      = "Int"
+	TypeNameInteger  = "Integer"
+	TypeNameFloat    = "Float"
+	TypeNameDateTime = "Datetime"
+)
+
 type GraphqlParser struct {
 	typeMap           map[string]Type
 	typeFieldMap      map[string]Fields
@@ -31,19 +42,21 @@ func NewGraphqlParser(sdlResolver SDLResolver) GraphqlParser {
 	}
 }
 
+type TypeNameMapOption func(_type string) *Type
+
 func (g *GraphqlParser) astAtInputType(inputType ast.Type) (Type, error) {
 	switch t := inputType.(type) {
 	case *ast.Named:
 		switch t.Name.Value {
-		case "ID":
+		case TypeNameID:
 			return ID, nil
-		case "Int":
+		case TypeNameInteger, TypeNameInt:
 			return Int, nil
-		case "Float":
+		case TypeNameFloat:
 			return Float, nil
-		case "Boolean":
+		case TypeNameBoolean, TypeNameBool:
 			return Boolean, nil
-		case "Datetime":
+		case TypeNameDateTime:
 			return DateTime, nil
 		default:
 			type_, err := g.asType(t)
@@ -120,15 +133,15 @@ func (g *GraphqlParser) asType(type_ ast.Type) (Type, error) {
 	switch t := type_.(type) {
 	case *ast.Named:
 		switch t.Name.Value {
-		case "String":
+		case TypeNameString:
 			return String, nil
-		case "ID":
+		case TypeNameID:
 			return ID, nil
-		case "Boolean", "Bool":
+		case TypeNameBoolean, TypeNameBool:
 			return Boolean, nil
-		case "Int", "Integer":
+		case TypeNameInt, TypeNameInteger:
 			return Int, nil
-		case "Float":
+		case TypeNameFloat:
 			return Float, nil
 		default:
 			if tp, ok := g.typeMap[t.Name.Value]; ok {
@@ -166,12 +179,18 @@ func unisonResolver(p ResolveTypeParams) *Object {
 	return nil
 }
 
-func (g *GraphqlParser) AstAsSchemaConfig(nodes []ast.Node) (*SchemaConfig, error) {
+func (g *GraphqlParser) AstAsSchemaConfig(nodes []ast.Node, opts ...TypeNameMapOption) (*SchemaConfig, error) {
 	var hasFields []ast.Node
 	for _, def := range nodes {
 		switch o := def.(type) {
 		case *ast.ScalarDefinition:
 			name := o.Name.Value
+			for _, opt := range opts {
+				if t := opt(name); t != nil {
+					g.typeMap[name] = *t
+					continue
+				}
+			}
 			g.typeMap[name] = NewScalar(ScalarConfig{
 				Name:        name,
 				Description: asString(o.Description),
