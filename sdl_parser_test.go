@@ -1,11 +1,32 @@
 package graphql
 
 import (
+	"github.com/tailor-inc/graphql/language/ast"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/tailor-inc/graphql/language/parser"
 )
+
+func TestAstAsSchemaConfig(t *testing.T) {
+	parser := NewGraphqlParser(func(typeName string, fieldName string) FieldResolveFn {
+		return DefaultResolveFn
+	})
+
+	TestType := NewScalar(ScalarConfig{
+		Name: "Test",
+	})
+
+	config, err := parser.AstAsSchemaConfig([]ast.Node{ast.NewScalarDefinition(&ast.ScalarDefinition{
+		Name: ast.NewName(&ast.Name{Value: "Test"}),
+	})}, func(_type string) Type {
+		return TestType
+	})
+	assert.NoError(t, err)
+
+	assert.Equal(t, config.Types[0], TestType)
+
+}
 
 func TestParseSDL(t *testing.T) {
 

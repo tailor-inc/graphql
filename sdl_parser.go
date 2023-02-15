@@ -42,7 +42,7 @@ func NewGraphqlParser(sdlResolver SDLResolver) GraphqlParser {
 	}
 }
 
-type TypeNameMapOption func(_type string) *Type
+type TypeNameMapOption func(_type string) Type
 
 func (g *GraphqlParser) astAtInputType(inputType ast.Type) (Type, error) {
 	switch t := inputType.(type) {
@@ -187,8 +187,8 @@ func (g *GraphqlParser) AstAsSchemaConfig(nodes []ast.Node, opts ...TypeNameMapO
 			name := o.Name.Value
 			for _, opt := range opts {
 				if t := opt(name); t != nil {
-					g.typeMap[name] = *t
-					continue
+					g.typeMap[name] = t
+					goto skip
 				}
 			}
 			g.typeMap[name] = NewScalar(ScalarConfig{
@@ -259,6 +259,7 @@ func (g *GraphqlParser) AstAsSchemaConfig(nodes []ast.Node, opts ...TypeNameMapO
 				hasFields = append(hasFields, o)
 			}
 		}
+	skip:
 	}
 	for _, def := range hasFields {
 		switch o := def.(type) {
