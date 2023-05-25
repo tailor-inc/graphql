@@ -131,9 +131,6 @@ func getVariableValue(schema Schema, definitionAST *ast.VariableDefinition, inpu
 
 // Given a type and any value, return a runtime value coerced to match the type.
 func coerceValue(ttype Input, value interface{}) interface{} {
-	if isNullish(value) {
-		return nil
-	}
 	switch ttype := ttype.(type) {
 	case *NonNull:
 		return coerceValue(ttype.OfType, value)
@@ -156,13 +153,15 @@ func coerceValue(ttype Input, value interface{}) interface{} {
 		}
 
 		for name, field := range ttype.Fields() {
-			fieldValue := coerceValue(field.Type, valueMap[name])
+			v, ok := valueMap[name]
+			if !ok && isNullish(field.DefaultValue) {
+				continue
+			}
+			fieldValue := coerceValue(field.Type, v)
 			if isNullish(fieldValue) {
 				fieldValue = field.DefaultValue
 			}
-			if !isNullish(fieldValue) {
-				obj[name] = fieldValue
-			}
+			obj[name] = fieldValue
 		}
 		return obj
 	case *Scalar:
@@ -174,7 +173,6 @@ func coerceValue(ttype Input, value interface{}) interface{} {
 			return parsed
 		}
 	}
-
 	return nil
 }
 
