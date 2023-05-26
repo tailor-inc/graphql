@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -323,11 +324,17 @@ var Float = NewScalar(ScalarConfig{
 })
 
 func coerceString(value interface{}) interface{} {
-	if v, ok := value.(*string); ok {
-		if v == nil {
+	if value == nil {
+		return nil
+	}
+	switch v := reflect.ValueOf(value); v.Kind() {
+	case reflect.Ptr:
+		if v.IsNil() {
 			return nil
 		}
-		return *v
+		return coerceString(v.Elem())
+	case reflect.String:
+		return value
 	}
 	return fmt.Sprintf("%v", value)
 }
