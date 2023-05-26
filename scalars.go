@@ -350,6 +350,9 @@ var String = NewScalar(ScalarConfig{
 })
 
 func coerceBool(value interface{}) interface{} {
+	if value == nil {
+		return nil
+	}
 	switch value := value.(type) {
 	case bool:
 		return value
