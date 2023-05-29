@@ -559,7 +559,7 @@ func TestCoerceString(t *testing.T) {
 	}
 	for i, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got, want := coerceString(tt.in), tt.want; true || got != want {
+			if got, want := coerceString(tt.in), tt.want; got != want {
 				t.Errorf("%d: in=%v [%T], got=%v [%T], want=%v [%T]", i, tt.in, tt.in, got, got, want, want)
 			}
 		})
