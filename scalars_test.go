@@ -1,6 +1,7 @@
 package graphql
 
 import (
+	"fmt"
 	"math"
 	"testing"
 )
@@ -452,300 +453,116 @@ func TestCoerceBool(t *testing.T) {
 		in   interface{}
 		want interface{}
 	}{
-		{
-			in:   false,
-			want: false,
-		},
-		{
-			in:   true,
-			want: true,
-		},
-		{
-			in:   boolPtr(false),
-			want: false,
-		},
-		{
-			in:   boolPtr(true),
-			want: true,
-		},
-		{
-			in:   (*bool)(nil),
-			want: nil,
-		},
-		{
-			in:   int(math.MinInt32),
-			want: true,
-		},
-		{
-			in:   int(math.MaxInt32),
-			want: true,
-		},
-		{
-			in:   int(0),
-			want: false,
-		},
-		{
-			in:   intPtr(12),
-			want: true,
-		},
-		{
-			in:   intPtr(0),
-			want: false,
-		},
-		{
-			in:   (*int)(nil),
-			want: nil,
-		},
-		{
-			in:   int8(13),
-			want: true,
-		},
-		{
-			in:   int8(0),
-			want: false,
-		},
-		{
-			in:   int8Ptr(14),
-			want: true,
-		},
-		{
-			in:   int8Ptr(0),
-			want: false,
-		},
-		{
-			in:   (*int8)(nil),
-			want: nil,
-		},
-		{
-			in:   int16(15),
-			want: true,
-		},
-		{
-			in:   int16(0),
-			want: false,
-		},
-		{
-			in:   int16Ptr(16),
-			want: true,
-		},
-		{
-			in:   int16Ptr(0),
-			want: false,
-		},
-		{
-			in:   (*int16)(nil),
-			want: nil,
-		},
-		{
-			in:   int32(17),
-			want: true,
-		},
-		{
-			in:   int32(0),
-			want: false,
-		},
-		{
-			in:   int32Ptr(18),
-			want: true,
-		},
-		{
-			in:   int32Ptr(0),
-			want: false,
-		},
-		{
-			in:   (*int32)(nil),
-			want: nil,
-		},
-		{
-			in:   int64(19),
-			want: true,
-		},
-		{
-			in:   int64(0),
-			want: false,
-		},
-		{
-			in:   int64Ptr(20),
-			want: true,
-		},
-		{
-			in:   int64Ptr(0),
-			want: false,
-		},
-		{
-			in:   (*int64)(nil),
-			want: nil,
-		},
-		{
-			in:   uint8(21),
-			want: true,
-		},
-		{
-			in:   uint8(0),
-			want: false,
-		},
-		{
-			in:   uint8Ptr(22),
-			want: true,
-		},
-		{
-			in:   uint8Ptr(0),
-			want: false,
-		},
-		{
-			in:   (*uint8)(nil),
-			want: nil,
-		},
-		{
-			in:   uint16(23),
-			want: true,
-		},
-		{
-			in:   uint16(0),
-			want: false,
-		},
-		{
-			in:   uint16Ptr(24),
-			want: true,
-		},
-		{
-			in:   uint16Ptr(0),
-			want: false,
-		},
-		{
-			in:   (*uint16)(nil),
-			want: nil,
-		},
-		{
-			in:   uint32(25),
-			want: true,
-		},
-		{
-			in:   uint32(0),
-			want: false,
-		},
-		{
-			in:   uint32Ptr(26),
-			want: true,
-		},
-		{
-			in:   uint32Ptr(0),
-			want: false,
-		},
-		{
-			in:   (*uint32)(nil),
-			want: nil,
-		},
-		{
-			in:   uint64(27),
-			want: true,
-		},
-		{
-			in:   uint64(0),
-			want: false,
-		},
-		{
-			in:   uint64Ptr(28),
-			want: true,
-		},
-		{
-			in:   uint64Ptr(0),
-			want: false,
-		},
-		{
-			in:   (*uint64)(nil),
-			want: nil,
-		},
-		{
-			in:   uintPtr(29),
-			want: true,
-		},
-		{
-			in:   uintPtr(0),
-			want: false,
-		},
-		{
-			in:   float32(30),
-			want: true,
-		},
-		{
-			in:   float32(0),
-			want: false,
-		},
-		{
-			in:   float32Ptr(31),
-			want: true,
-		},
-		{
-			in:   float32Ptr(0),
-			want: false,
-		},
-		{
-			in:   (*float32)(nil),
-			want: nil,
-		},
-		{
-			in:   float64(32),
-			want: true,
-		},
-		{
-			in:   float64(0),
-			want: false,
-		},
-		{
-			in:   float64Ptr(33.2),
-			want: true,
-		},
-		{
-			in:   float64Ptr(0),
-			want: false,
-		},
-		{
-			in:   (*float64)(nil),
-			want: nil,
-		},
-		{
-			in:   "34",
-			want: true,
-		},
-		{
-			in:   "false",
-			want: false,
-		},
-		{
-			in:   stringPtr("true"),
-			want: true,
-		},
-		{
-			in:   stringPtr("false"),
-			want: false,
-		},
-		{
-			in:   (*string)(nil),
-			want: nil,
-		},
-		{
-			in:   "I'm some random string",
-			want: true,
-		},
-		{
-			in:   "",
-			want: false,
-		},
-		{
-			in:   int8(0),
-			want: false,
-		},
-		{
-			in:   make(map[string]interface{}),
-			want: false,
-		},
+		{in: false, want: false},
+		{in: true, want: true},
+		{in: boolPtr(false), want: false},
+		{in: boolPtr(true), want: true},
+		{in: (*bool)(nil), want: nil},
+		{in: int(math.MinInt32), want: true},
+		{in: int(math.MaxInt32), want: true},
+		{in: int(0), want: false},
+		{in: intPtr(12), want: true},
+		{in: intPtr(0), want: false},
+		{in: (*int)(nil), want: nil},
+		{in: int8(13), want: true},
+		{in: int8(0), want: false},
+		{in: int8Ptr(14), want: true},
+		{in: int8Ptr(0), want: false},
+		{in: (*int8)(nil), want: nil},
+		{in: int16(15), want: true},
+		{in: int16(0), want: false},
+		{in: int16Ptr(16), want: true},
+		{in: int16Ptr(0), want: false},
+		{in: (*int16)(nil), want: nil},
+		{in: int32(17), want: true},
+		{in: int32(0), want: false},
+		{in: int32Ptr(18), want: true},
+		{in: int32Ptr(0), want: false},
+		{in: (*int32)(nil), want: nil},
+		{in: int64(19), want: true},
+		{in: int64(0), want: false},
+		{in: int64Ptr(20), want: true},
+		{in: int64Ptr(0), want: false},
+		{in: (*int64)(nil), want: nil},
+		{in: uint8(21), want: true},
+		{in: uint8(0), want: false},
+		{in: uint8Ptr(22), want: true},
+		{in: uint8Ptr(0), want: false},
+		{in: (*uint8)(nil), want: nil},
+		{in: uint16(23), want: true},
+		{in: uint16(0), want: false},
+		{in: uint16Ptr(24), want: true},
+		{in: uint16Ptr(0), want: false},
+		{in: (*uint16)(nil), want: nil},
+		{in: uint32(25), want: true},
+		{in: uint32(0), want: false},
+		{in: uint32Ptr(26), want: true},
+		{in: uint32Ptr(0), want: false},
+		{in: (*uint32)(nil), want: nil},
+		{in: uint64(27), want: true},
+		{in: uint64(0), want: false},
+		{in: uint64Ptr(28), want: true},
+		{in: uint64Ptr(0), want: false},
+		{in: (*uint64)(nil), want: nil},
+		{in: uintPtr(29), want: true},
+		{in: uintPtr(0), want: false},
+		{in: float32(30), want: true},
+		{in: float32(0), want: false},
+		{in: float32Ptr(31), want: true},
+		{in: float32Ptr(0), want: false},
+		{in: (*float32)(nil), want: nil},
+		{in: float64(32), want: true},
+		{in: float64(0), want: false},
+		{in: float64Ptr(33.2), want: true},
+		{in: float64Ptr(0), want: false},
+		{in: (*float64)(nil), want: nil},
+		{in: "34", want: true},
+		{in: "false", want: false},
+		{in: stringPtr("true"), want: true},
+		{in: stringPtr("false"), want: false},
+		{in: (*string)(nil), want: nil},
+		{in: "I'm some random string", want: true},
+		{in: "", want: false},
+		{in: int8(0), want: false},
+		{in: make(map[string]interface{}), want: false},
+		{in: (*bool)(nil), want: nil},
+		{in: nil, want: nil},
 	}
-
 	for i, tt := range tests {
-		if got, want := coerceBool(tt.in), tt.want; got != want {
-			t.Errorf("%d: in=%v, got=%v, want=%v", i, tt.in, got, want)
-		}
+		t.Run(fmt.Sprintf("CoerceBool:%d", i), func(t *testing.T) {
+			if got, want := coerceBool(tt.in), tt.want; got != want {
+				t.Errorf("%d: in=%v, got=%v, want=%v", i, tt.in, got, want)
+			}
+		})
+	}
+}
+
+func TestCoerceString(t *testing.T) {
+	tests := []struct {
+		name string
+		in   interface{}
+		want interface{}
+	}{
+		{name: "bool false", in: false, want: "false"},
+		{name: "bool true", in: true, want: "true"},
+		{name: "bool pointer false", in: boolPtr(false), want: "false"},
+		{name: "bool pointer true", in: boolPtr(true), want: "true"},
+		{name: "bool nil", in: (*bool)(nil), want: nil},
+		{name: "integer", in: 123, want: "123"},
+		{name: "integer pointer", in: intPtr(123), want: "123"},
+		{name: "integer nil", in: (*int)(nil), want: nil},
+		{name: "string", in: "hello", want: "hello"},
+		{name: "string pointer", in: stringPtr("hello"), want: "hello"},
+		{name: "string nil", in: (*string)(nil), want: nil},
+		{name: "map", in: map[string]interface{}{"hello": "goodbye"}, want: "map[hello:goodbye]"},
+		{name: "nil", in: nil, want: nil},
+	}
+	for i, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got, want := coerceString(tt.in), tt.want; true || got != want {
+				t.Errorf("%d: in=%v [%T], got=%v [%T], want=%v [%T]", i, tt.in, tt.in, got, got, want, want)
+			}
+		})
 	}
 }
 
