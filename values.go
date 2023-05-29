@@ -135,6 +135,9 @@ func coerceValue(ttype Input, value interface{}) interface{} {
 	case *NonNull:
 		return coerceValue(ttype.OfType, value)
 	case *List:
+		if isNullish(value) {
+			return nil
+		}
 		var values = []interface{}{}
 		valType := reflect.ValueOf(value)
 		if valType.Kind() == reflect.Slice {
