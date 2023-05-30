@@ -1,4 +1,4 @@
-# graphql [![CircleCI](https://circleci.com/gh/graphql-go/graphql/tree/master.svg?style=svg)](https://circleci.com/gh/graphql-go/graphql/tree/master) [![Go Reference](https://pkg.go.dev/badge/github.com/tailor-inc/graphql.svg)](https://pkg.go.dev/github.com/tailor-inc/graphql) [![Coverage Status](https://coveralls.io/repos/github/graphql-go/graphql/badge.svg?branch=master)](https://coveralls.io/github/graphql-go/graphql?branch=master) [![Join the chat at https://gitter.im/graphql-go/graphql](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/graphql-go/graphql?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+# graphql [![Go package](https://github.com/tailor-inc/graphql/actions/workflows/ci.yml/badge.svg)](https://github.com/tailor-inc/graphql/actions/workflows/ci.yml) [![Go Reference](https://pkg.go.dev/badge/github.com/tailor-inc/graphql.svg)](https://pkg.go.dev/github.com/tailor-inc/graphql)
 
 An implementation of GraphQL in Go. Follows the official reference implementation [`graphql-js`](https://github.com/graphql/graphql-js).
 
