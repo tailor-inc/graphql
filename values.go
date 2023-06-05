@@ -63,18 +63,10 @@ func getArgumentValues(
 		if tmp = valueFromAST(value, argDef.Type, variableValues); isNullish(tmp) {
 			tmp = argDef.DefaultValue
 		}
-		if isUndefined {
-			if !isNullish(tmp) {
-				results[argDef.PrivateName] = tmp
-			}
-		} else {
-			if tmp == nil {
-				results[argDef.PrivateName] = nil
-			} else {
-				if !isNullish(tmp) {
-					results[argDef.PrivateName] = tmp
-				}
-			}
+		if !isUndefined && tmp == nil {
+			results[argDef.PrivateName] = nil
+		} else if !isNullish(tmp) {
+			results[argDef.PrivateName] = tmp
 		}
 	}
 	return results
@@ -416,18 +408,10 @@ func valueFromAST(valueAST ast.Value, ttype Input, variables map[string]interfac
 				isUndefined = true
 				value = field.DefaultValue
 			}
-			if isUndefined {
-				if !isNullish(value) {
-					obj[name] = value
-				}
-			} else {
-				if value == nil {
-					obj[name] = nil
-				} else {
-					if !isNullish(value) {
-						obj[name] = value
-					}
-				}
+			if !isUndefined && value == nil {
+				obj[name] = nil
+			} else if !isNullish(value) {
+				obj[name] = value
 			}
 		}
 		return obj
