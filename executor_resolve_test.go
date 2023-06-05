@@ -82,7 +82,7 @@ func TestExecutesResolveFunction_UsesProvidedResolveFunction(t *testing.T) {
 	})
 
 	expected := map[string]interface{}{
-		"test": `{"aInt":null,"aStr":null}`,
+		"test": `{}`,
 	}
 	result := graphql.Do(graphql.Params{
 		Schema:        schema,
@@ -93,7 +93,7 @@ func TestExecutesResolveFunction_UsesProvidedResolveFunction(t *testing.T) {
 	}
 
 	expected = map[string]interface{}{
-		"test": `{"aInt":null,"aStr":"String!"}`,
+		"test": `{"aStr":"String!"}`,
 	}
 	result = graphql.Do(graphql.Params{
 		Schema:        schema,

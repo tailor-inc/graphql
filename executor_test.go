@@ -1319,7 +1319,7 @@ func TestDoesNotIncludeArgumentsThatWereNotSet(t *testing.T) {
 
 	expected := &graphql.Result{
 		Data: map[string]interface{}{
-			"field": `{"a":true,"b":null,"c":false,"d":null,"e":0}`,
+			"field": `{"a":true,"c":false,"e":0}`,
 		},
 	}
 
