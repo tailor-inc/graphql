@@ -60,9 +60,7 @@ func getArgumentValues(
 		if tmp = valueFromAST(value, argDef.Type, variableValues); isNullish(tmp) {
 			tmp = argDef.DefaultValue
 		}
-		if !isNullish(tmp) {
-			results[argDef.PrivateName] = tmp
-		}
+		results[argDef.PrivateName] = tmp
 	}
 	return results
 }
@@ -399,9 +397,7 @@ func valueFromAST(valueAST ast.Value, ttype Input, variables map[string]interfac
 			} else {
 				value = field.DefaultValue
 			}
-			if !isNullish(value) {
-				obj[name] = value
-			}
+			obj[name] = value
 		}
 		return obj
 	case *Scalar:

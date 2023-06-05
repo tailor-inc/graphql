@@ -70,6 +70,9 @@ func inputResolved(p graphql.ResolveParams) (interface{}, error) {
 	if !ok {
 		return nil, nil
 	}
+	if input == nil {
+		return nil, nil
+	}
 	b, err := json.Marshal(input)
 	if err != nil {
 		return nil, nil
@@ -178,7 +181,7 @@ func TestVariables_ObjectsAndNullability_UsingInlineStructs_ExecutesWithComplexI
 	`
 	expected := &graphql.Result{
 		Data: map[string]interface{}{
-			"fieldWithObjectInput": `{"a":"foo","b":["bar"],"c":"baz"}`,
+			"fieldWithObjectInput": `{"a":"foo","b":["bar"],"c":"baz","d":null}`,
 		},
 	}
 	// parse query
@@ -205,7 +208,7 @@ func TestVariables_ObjectsAndNullability_UsingInlineStructs_ProperlyParsesSingle
 	`
 	expected := &graphql.Result{
 		Data: map[string]interface{}{
-			"fieldWithObjectInput": `{"a":"foo","b":["bar"],"c":"baz"}`,
+			"fieldWithObjectInput": `{"a":"foo","b":["bar"],"c":"baz","d":null}`,
 		},
 	}
 	// parse query
@@ -259,7 +262,7 @@ func TestVariables_ObjectsAndNullability_UsingInlineStructs_ProperlyRunsParseLit
 	`
 	expected := &graphql.Result{
 		Data: map[string]interface{}{
-			"fieldWithObjectInput": `{"a":"foo","d":"DeserializedValue"}`,
+			"fieldWithObjectInput": `{"a":"foo","b":null,"c":null,"d":"DeserializedValue"}`,
 		},
 	}
 	// parse query
@@ -328,7 +331,7 @@ func TestVariables_ObjectsAndNullability_UsingVariables_UsesDefaultValueWhenNotP
 	`
 	expected := &graphql.Result{
 		Data: map[string]interface{}{
-			"fieldWithObjectInput": `{"a":"foo","b":["bar"],"c":"baz"}`,
+			"fieldWithObjectInput": `{"a":"foo","b":["bar"],"c":"baz","d":null}`,
 		},
 	}
 
