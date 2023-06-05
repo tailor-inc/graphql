@@ -41,13 +41,13 @@ var enumTypeTestQueryType = graphql.NewObject(graphql.ObjectConfig{
 				},
 			},
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				if fromInt, ok := p.Args["fromInt"]; ok {
+				if fromInt, ok := p.Args["fromInt"]; ok && fromInt != nil {
 					return fromInt, nil
 				}
-				if fromString, ok := p.Args["fromString"]; ok {
+				if fromString, ok := p.Args["fromString"]; ok && fromString != nil {
 					return fromString, nil
 				}
-				if fromEnum, ok := p.Args["fromEnum"]; ok {
+				if fromEnum, ok := p.Args["fromEnum"]; ok && fromEnum != nil {
 					return fromEnum, nil
 				}
 				return nil, nil
@@ -64,10 +64,10 @@ var enumTypeTestQueryType = graphql.NewObject(graphql.ObjectConfig{
 				},
 			},
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				if fromInt, ok := p.Args["fromInt"]; ok {
+				if fromInt, ok := p.Args["fromInt"]; ok && fromInt != nil {
 					return fromInt, nil
 				}
-				if fromEnum, ok := p.Args["fromEnum"]; ok {
+				if fromEnum, ok := p.Args["fromEnum"]; ok && fromEnum != nil {
 					return fromEnum, nil
 				}
 				return nil, nil

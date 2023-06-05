@@ -2,10 +2,11 @@ package graphql_test
 
 import (
 	"encoding/json"
-	"github.com/tailor-inc/graphql"
-	"github.com/tailor-inc/graphql/testutil"
 	"reflect"
 	"testing"
+
+	"github.com/tailor-inc/graphql"
+	"github.com/tailor-inc/graphql/testutil"
 )
 
 func testSchema(t *testing.T, testField *graphql.Field) graphql.Schema {
@@ -81,7 +82,7 @@ func TestExecutesResolveFunction_UsesProvidedResolveFunction(t *testing.T) {
 	})
 
 	expected := map[string]interface{}{
-		"test": "{}",
+		"test": `{}`,
 	}
 	result := graphql.Do(graphql.Params{
 		Schema:        schema,

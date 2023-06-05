@@ -70,6 +70,9 @@ func inputResolved(p graphql.ResolveParams) (interface{}, error) {
 	if !ok {
 		return nil, nil
 	}
+	if input == nil {
+		return nil, nil
+	}
 	b, err := json.Marshal(input)
 	if err != nil {
 		return nil, nil

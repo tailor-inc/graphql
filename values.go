@@ -51,16 +51,21 @@ func getArgumentValues(
 	results := map[string]interface{}{}
 	for _, argDef := range argDefs {
 		var (
-			tmp   interface{}
-			value ast.Value
+			tmp         interface{}
+			value       ast.Value
+			isUndefined bool
 		)
 		if tmpValue, ok := argASTMap[argDef.PrivateName]; ok {
 			value = tmpValue.Value
+		} else {
+			isUndefined = true
 		}
 		if tmp = valueFromAST(value, argDef.Type, variableValues); isNullish(tmp) {
 			tmp = argDef.DefaultValue
 		}
-		if !isNullish(tmp) {
+		if !isUndefined && tmp == nil {
+			results[argDef.PrivateName] = nil
+		} else if !isNullish(tmp) {
 			results[argDef.PrivateName] = tmp
 		}
 	}
@@ -393,13 +398,19 @@ func valueFromAST(valueAST ast.Value, ttype Input, variables map[string]interfac
 		}
 		obj := map[string]interface{}{}
 		for name, field := range ttype.Fields() {
-			var value interface{}
+			var (
+				value       interface{}
+				isUndefined bool
+			)
 			if of, ok = fieldASTs[name]; ok {
 				value = valueFromAST(of.Value, field.Type, variables)
 			} else {
+				isUndefined = true
 				value = field.DefaultValue
 			}
-			if !isNullish(value) {
+			if !isUndefined && value == nil {
+				obj[name] = nil
+			} else if !isNullish(value) {
 				obj[name] = value
 			}
 		}
