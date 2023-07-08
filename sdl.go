@@ -51,9 +51,13 @@ func directivesAsNode(directives []*ObjectDirective) []*ast.Directive {
 	return dirs
 }
 
-func objectAsNode(o *Object) ast.Node {
+func objectAsNode(o *Object, options *SDLExportOptions) ast.Node {
 	var fields []*ast.FieldDefinition
 	for name, object := range o.Fields() {
+		if options != nil && options.ExcludeQueryService &&
+			o.Name() == "Query" && name == "_service" {
+			continue
+		}
 		var directives []*ast.Directive
 		for _, d := range object.Directives {
 			var args []*ast.Argument
@@ -169,12 +173,12 @@ func unionAsNode(o *Union) *ast.UnionDefinition {
 	})
 }
 
-func typeAstNode(tp Type) ast.Node {
+func typeAstNode(tp Type, options *SDLExportOptions) ast.Node {
 	switch o := tp.(type) {
 	case *InputObject:
 		return inputObjectAsNode(o)
 	case *Object:
-		return objectAsNode(o)
+		return objectAsNode(o, options)
 	case *Enum:
 		return enumAsNode(o)
 	case *Scalar:
@@ -189,7 +193,7 @@ func BuildSDL(schema Schema, option *SDLExportOptions) string {
 	doc := ast.Document{}
 	for name, tp := range schema.typeMap {
 		if option != nil {
-			if option.HideDoubleUnderscorePrefix && strings.HasPrefix(name, "__") {
+			if option.ExcludeDoubleUnderscorePrefix && strings.HasPrefix(name, "__") {
 				continue
 			}
 			if !option.IncludeBasicScalar {
@@ -198,8 +202,11 @@ func BuildSDL(schema Schema, option *SDLExportOptions) string {
 					continue
 				}
 			}
+			if option.ExcludeQueryService && name == "_Service" {
+				continue
+			}
 		}
-		doc.Definitions = append(doc.Definitions, typeAstNode(tp))
+		doc.Definitions = append(doc.Definitions, typeAstNode(tp, option))
 	}
 
 	printed := printer.Print(ast.NewDocument(&doc))
@@ -208,6 +215,7 @@ func BuildSDL(schema Schema, option *SDLExportOptions) string {
 }
 
 type SDLExportOptions struct {
-	HideDoubleUnderscorePrefix bool
-	IncludeBasicScalar         bool
+	ExcludeDoubleUnderscorePrefix bool
+	ExcludeQueryService           bool
+	IncludeBasicScalar            bool
 }
