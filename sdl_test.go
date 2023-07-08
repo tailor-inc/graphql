@@ -1,8 +1,8 @@
 package graphql
 
 import (
-	"github.com/tailor-inc/graphql/language/printer"
 	"github.com/stretchr/testify/assert"
+	"github.com/tailor-inc/graphql/language/printer"
 	"testing"
 )
 
@@ -35,6 +35,31 @@ func TestBuildSDL(t *testing.T) {
 			"fields": &ArgumentConfig{
 				Type:        String,
 				Description: "ddd",
+			},
+		},
+	})
+
+	serviceType := NewObject(ObjectConfig{
+		Name: "_Service",
+		Fields: Fields{
+			"_sdl": &Field{
+				Type:        String,
+				Description: "gdl query desc",
+			},
+		},
+	})
+
+	queryType := NewObject(ObjectConfig{
+		Name:        "Query",
+		Description: "Query desc",
+		Fields: Fields{
+			"me": &Field{
+				Type:        String,
+				Description: "me query desc",
+			},
+			"_service": &Field{
+				Type:        serviceType,
+				Description: "for federation",
 			},
 		},
 	})
@@ -140,6 +165,7 @@ func TestBuildSDL(t *testing.T) {
 		},
 	})
 
+	types = append(types, serviceType)
 	types = append(types, enum1)
 	types = append(types, testType1)
 	types = append(types, testType2)
@@ -148,8 +174,30 @@ func TestBuildSDL(t *testing.T) {
 	types = append(types, pingOutputType)
 	types = append(types, datetime)
 
+	t.Run("objectAsNode exclude Query._service", func(t *testing.T) {
+		sdl := printer.Print(objectAsNode(queryType, &SDLExportOptions{
+			ExcludeQueryService: false,
+		}))
+		assert.Contains(t, sdl, `"""Query desc"""
+type Query {`)
+		assert.Contains(t, sdl, `"""for federation"""
+  _service: _Service`)
+		assert.Contains(t, sdl, `"""me query desc"""
+  me: String`)
+		sdl = printer.Print(objectAsNode(queryType, &SDLExportOptions{
+			ExcludeQueryService: true,
+		}))
+		assert.Contains(t, sdl, `"""Query desc"""
+type Query {`)
+		assert.Contains(t, sdl, `"""me query desc"""
+  me: String`)
+		assert.NotContains(t, sdl, `"""for federation"""
+  _service: String`)
+	})
+
+	defaultOptions := SDLExportOptions{}
 	t.Run("objectAsNode", func(t *testing.T) {
-		sdl := printer.Print(objectAsNode(testType1))
+		sdl := printer.Print(objectAsNode(testType1, &defaultOptions))
 		assert.True(t, testType1.extend)
 		assert.Contains(t, sdl, `"""TestType1 desc"""
 extend type TestType1 @key(fields: "id") {`)
@@ -158,7 +206,6 @@ extend type TestType1 @key(fields: "id") {`)
 		assert.Contains(t, sdl, `enum1: Enum1`)
 		assert.Contains(t, sdl, `"""type1 arr[int] desc"""
   arr: [Int]`)
-
 	})
 
 	t.Run("inputObjectAsNode", func(t *testing.T) {
@@ -194,6 +241,10 @@ scalar Datetime`)
 			"ping": &Field{
 				Type: pingOutputType,
 			},
+			"_service": &Field{
+				Type:        serviceType,
+				Description: "for federation",
+			},
 		}}),
 		Mutation: NewObject(ObjectConfig{Name: "Mutation", Fields: Fields{
 			"ping": &Field{
@@ -210,22 +261,30 @@ scalar Datetime`)
 	assert.NoError(t, err)
 
 	sdl := BuildSDL(schema, &SDLExportOptions{
-		HideDoubleUnderscorePrefix: true,
-		IncludeBasicScalar:         false,
+		ExcludeDoubleUnderscorePrefix: true,
+		IncludeBasicScalar:            false,
+		ExcludeQueryService:           true,
 	})
 
 	assert.NotContains(t, sdl, "scalar String")
 	assert.NotContains(t, sdl, "scalar Boolean")
 	assert.NotContains(t, sdl, "scalar Int")
 	assert.NotContains(t, sdl, "__")
+	assert.NotContains(t, sdl, "_Service")
+	assert.NotContains(t, sdl, "_service")
+	assert.NotContains(t, sdl, "_sdl")
 
 	sdl = BuildSDL(schema, &SDLExportOptions{
-		HideDoubleUnderscorePrefix: true,
-		IncludeBasicScalar:         true,
+		ExcludeDoubleUnderscorePrefix: true,
+		IncludeBasicScalar:            true,
+		ExcludeQueryService:           false,
 	})
 
 	assert.Contains(t, sdl, "scalar String")
 	assert.Contains(t, sdl, "scalar Boolean")
 	assert.Contains(t, sdl, "scalar Int")
+	assert.Contains(t, sdl, "_Service")
+	assert.Contains(t, sdl, "_service")
+	assert.Contains(t, sdl, "_sdl")
 
 }
