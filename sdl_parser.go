@@ -3,6 +3,7 @@ package graphql
 import (
 	"errors"
 	"fmt"
+
 	"github.com/tailor-inc/graphql/language/ast"
 	"github.com/tailor-inc/graphql/language/parser"
 )
@@ -285,7 +286,7 @@ func (g *GraphqlParser) AstAsSchemaConfig(nodes []ast.Node, opts ...TypeNameMapO
 						Args:        args,
 						Type:        type_,
 						Directives:  directives,
-						Description: asString(o.Description),
+						Description: asString(field.Description),
 						Resolve:     g.sdlResolver(name, fieldName),
 					}
 				} else {
@@ -312,7 +313,7 @@ func (g *GraphqlParser) AstAsSchemaConfig(nodes []ast.Node, opts ...TypeNameMapO
 					}
 					i[fieldName] = &InputObjectFieldConfig{
 						Type:        type_,
-						Description: asString(o.Description),
+						Description: asString(field.Description),
 					}
 				} else {
 					return nil, errors.New(fmt.Sprintf("input type %s is not found", fieldName))
@@ -330,7 +331,7 @@ func (g *GraphqlParser) AstAsSchemaConfig(nodes []ast.Node, opts ...TypeNameMapO
 					f[argName] = &ArgumentConfig{
 						Type:         type_,
 						DefaultValue: arg.DefaultValue.GetValue(),
-						Description:  asString(o.Description),
+						Description:  asString(arg.Description),
 					}
 				}
 			} else {
