@@ -1,10 +1,11 @@
 package graphql
 
 import (
-	"github.com/tailor-inc/graphql/language/ast"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/tailor-inc/graphql/language/ast"
 	"github.com/tailor-inc/graphql/language/parser"
 )
 
@@ -59,7 +60,9 @@ type Test {
 	enum: TestEnum
 }
 
+"""Description for TestQuery"""
 input TestQuery {
+	"""Description for i"""
 	i: Int
 	and: Query
 }
@@ -104,6 +107,8 @@ type Mutation {
 
 	assert.NotNil(t, t, schema.QueryType())
 	assert.Len(t, schema.TypeMap(), 22)
+	assert.Equal(t, "Description for TestQuery", schema.Type("TestQuery").Description())
+	assert.Equal(t, "Description for i", schema.Type("TestQuery").(*InputObject).Fields()["i"].Description())
 
 	query := `
 query Example {
