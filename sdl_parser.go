@@ -203,7 +203,7 @@ func (g *GraphqlParser) AstAsSchemaConfig(nodes []ast.Node, opts ...TypeNameMapO
 			name := o.Name.Value
 			values := make(EnumValueConfigMap)
 			for _, v := range o.Values {
-				values[name] = &EnumValueConfig{
+				values[v.Name.Value] = &EnumValueConfig{
 					Value:       v.Name.Value,
 					Description: asString(v.Description),
 				}
