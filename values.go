@@ -154,6 +154,9 @@ func coerceValue(ttype Input, value interface{}) interface{} {
 		}
 		return append(values, coerceValue(ttype.OfType, value))
 	case *InputObject:
+		if isNullish(value) {
+			return nil
+		}
 		var obj = map[string]interface{}{}
 		valueMap, _ := value.(map[string]interface{})
 		if valueMap == nil {
