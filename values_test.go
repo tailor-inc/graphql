@@ -1,6 +1,9 @@
 package graphql
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestIsIterable(t *testing.T) {
 	if !isIterable([]int{}) {
@@ -14,5 +17,54 @@ func TestIsIterable(t *testing.T) {
 	}
 	if isIterable(nil) {
 		t.Fatal("expected isIterable to return false for nil, got true")
+	}
+}
+
+func Test_coerceValue(t *testing.T) {
+	t.Parallel()
+
+	type input struct {
+		ttype Input
+		value any
+	}
+	testCases := map[string]struct {
+		input    input
+		expected any
+	}{
+		"null Input Object is coerced to nil": {
+			input: input{
+				ttype: NewInputObject(InputObjectConfig{
+					Name: "InputObject",
+				}),
+				value: nil,
+			},
+			expected: nil,
+		},
+		"null field in Input Object is not omitted, and coerced to nil": {
+			input: input{
+				ttype: NewInputObject(InputObjectConfig{
+					Name: "InputObject",
+					Fields: InputObjectConfigFieldMap{
+						"string": &InputObjectFieldConfig{
+							Type: String,
+						},
+					},
+				}),
+				value: map[string]any{"string": nil},
+			},
+			expected: map[string]any{"string": nil},
+		},
+	}
+
+	for name, tc := range testCases {
+		name, tc := name, tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := coerceValue(tc.input.ttype, tc.input.value)
+			if !reflect.DeepEqual(tc.expected, got) {
+				t.Errorf("unexpected result, expected: %v, got: %v", tc.expected, got)
+			}
+		})
 	}
 }
