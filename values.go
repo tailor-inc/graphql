@@ -136,13 +136,13 @@ func getVariableValue(schema Schema, definitionAST *ast.VariableDefinition, inpu
 
 // Given a type and any value, return a runtime value coerced to match the type.
 func coerceValue(ttype Input, value interface{}) interface{} {
+	if isNullish(value) {
+		return nil
+	}
 	switch ttype := ttype.(type) {
 	case *NonNull:
 		return coerceValue(ttype.OfType, value)
 	case *List:
-		if isNullish(value) {
-			return nil
-		}
 		var values = []interface{}{}
 		valType := reflect.ValueOf(value)
 		if valType.Kind() == reflect.Slice {
