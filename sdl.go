@@ -1,9 +1,10 @@
 package graphql
 
 import (
+	"strings"
+
 	"github.com/tailor-inc/graphql/language/ast"
 	"github.com/tailor-inc/graphql/language/printer"
-	"strings"
 )
 
 func typeAsNode(tp Input) ast.Type {
@@ -189,7 +190,17 @@ func typeAstNode(tp Type, options *SDLExportOptions) ast.Node {
 	return nil
 }
 
-func BuildSDL(schema Schema, option *SDLExportOptions) string {
+func BuildSDL(schema Schema, option *SDLExportOptions) (ret string) {
+	defer func() {
+		if r := recover(); r != nil {
+			// NOTE(ysh)
+			// Probably a nil pointer dereference occurred somewhere inside
+			// As the current return I/F doesn't have error
+			// we return an empty string as error to keep I/F unchanged
+			// A caller should log the schema when receiving an empty string
+			ret = ""
+		}
+	}()
 	doc := ast.Document{}
 	for name, tp := range schema.typeMap {
 		if option != nil {
