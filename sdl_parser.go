@@ -236,6 +236,38 @@ func (g *GraphqlParser) AstAsSchemaConfig(nodes []ast.Node, opts ...TypeNameMapO
 			if len(o.Fields) > 0 {
 				hasFields = append(hasFields, o)
 			}
+		case *ast.TypeExtensionDefinition:
+			name := o.Definition.Name.Value
+			if _, ok := g.typeMap[name]; !ok {
+				return nil, errors.New(fmt.Sprintf("type %s is not found", name))
+			}
+			for _, field := range o.Definition.Fields {
+				fieldName := field.Name.Value
+				if t, ok := g.typeFieldMap[name]; ok {
+					type_, err := g.asType(field.Type)
+					if err != nil {
+						return nil, err
+					}
+					args, err := g.asFieldConfigArgs(field.Arguments)
+					if err != nil {
+						return nil, err
+					}
+					directives, err := g.asObjectDirectives(field.Directives)
+					if err != nil {
+						return nil, err
+					}
+					t[fieldName] = &Field{
+						Name:        fieldName,
+						Args:        args,
+						Type:        type_,
+						Directives:  directives,
+						Description: asString(field.Description),
+						Resolve:     g.sdlResolver(name, fieldName),
+					}
+				} else {
+					return nil, errors.New(fmt.Sprintf("type %s is not found", fieldName))
+				}
+			}
 		case *ast.InputObjectDefinition:
 			name := o.Name.Value
 			g.inputFieldMap[name] = InputObjectConfigFieldMap{}

@@ -389,7 +389,7 @@ func TestAllowsNonKeywordsAnywhereNameIsAllowed(t *testing.T) {
 	}
 }
 
-func TestTypeExtenstion(t *testing.T) {
+func TestTypeExtension(t *testing.T) {
 	source := `
       """ Foo """
       extend type Foo {
