@@ -1,7 +1,6 @@
 package graphql
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/tailor-inc/graphql/language/ast"
@@ -68,7 +67,7 @@ func (g *GraphqlParser) astAtInputType(inputType ast.Type) (Type, error) {
 			case *InputObject, *Scalar, *List, *NonNull, *Union:
 				return type_, nil
 			default:
-				return nil, errors.New(fmt.Sprintf("%s is not use InputType", t.Name.Value))
+				return nil, fmt.Errorf("%s is not use InputType", t.Name.Value)
 			}
 		}
 	case *ast.NonNull:
@@ -84,7 +83,7 @@ func (g *GraphqlParser) astAtInputType(inputType ast.Type) (Type, error) {
 		}
 		return NewList(type_), nil
 	default:
-		return nil, errors.New(fmt.Sprintf("%s is not use InputType", inputType.String()))
+		return nil, fmt.Errorf("%s is not use InputType", inputType.String())
 	}
 }
 
@@ -104,7 +103,7 @@ func (g *GraphqlParser) asObjectDirectives(directives []*ast.Directive) (FieldDi
 				Directive: directive,
 			})
 		} else {
-			return nil, errors.New(fmt.Sprintf("directive %s is not found", directive.Name))
+			return nil, fmt.Errorf("directive %s is not found", directive.Name)
 		}
 	}
 	return fieldDirectives, nil
@@ -148,7 +147,7 @@ func (g *GraphqlParser) asType(type_ ast.Type) (Type, error) {
 			if tp, ok := g.typeMap[t.Name.Value]; ok {
 				return tp, nil
 			} else {
-				return nil, errors.New(fmt.Sprintf("type %s is not found", t.Name.Value))
+				return nil, fmt.Errorf("type %s is not found", t.Name.Value)
 			}
 		}
 	case *ast.NonNull:
@@ -164,7 +163,7 @@ func (g *GraphqlParser) asType(type_ ast.Type) (Type, error) {
 		}
 		return NewList(tt), nil
 	default:
-		return nil, errors.New(fmt.Sprintf("type %s is not found", t.String()))
+		return nil, fmt.Errorf("type %s is not found", t.String())
 	}
 }
 
@@ -236,6 +235,38 @@ func (g *GraphqlParser) AstAsSchemaConfig(nodes []ast.Node, opts ...TypeNameMapO
 			if len(o.Fields) > 0 {
 				hasFields = append(hasFields, o)
 			}
+		case *ast.TypeExtensionDefinition:
+			name := o.Definition.Name.Value
+			if _, ok := g.typeMap[name]; !ok {
+				return nil, fmt.Errorf("type %s is not found", name)
+			}
+			for _, field := range o.Definition.Fields {
+				fieldName := field.Name.Value
+				if t, ok := g.typeFieldMap[name]; ok {
+					type_, err := g.asType(field.Type)
+					if err != nil {
+						return nil, err
+					}
+					args, err := g.asFieldConfigArgs(field.Arguments)
+					if err != nil {
+						return nil, err
+					}
+					directives, err := g.asObjectDirectives(field.Directives)
+					if err != nil {
+						return nil, err
+					}
+					t[fieldName] = &Field{
+						Name:        fieldName,
+						Args:        args,
+						Type:        type_,
+						Directives:  directives,
+						Description: asString(field.Description),
+						Resolve:     g.sdlResolver(name, fieldName),
+					}
+				} else {
+					return nil, fmt.Errorf("type %s is not found", fieldName)
+				}
+			}
 		case *ast.InputObjectDefinition:
 			name := o.Name.Value
 			g.inputFieldMap[name] = InputObjectConfigFieldMap{}
@@ -291,7 +322,7 @@ func (g *GraphqlParser) AstAsSchemaConfig(nodes []ast.Node, opts ...TypeNameMapO
 						Resolve:     g.sdlResolver(name, fieldName),
 					}
 				} else {
-					return nil, errors.New(fmt.Sprintf("type %s is not found", fieldName))
+					return nil, fmt.Errorf("type %s is not found", fieldName)
 				}
 			}
 		case *ast.UnionDefinition:
@@ -317,7 +348,7 @@ func (g *GraphqlParser) AstAsSchemaConfig(nodes []ast.Node, opts ...TypeNameMapO
 						Description: asString(field.Description),
 					}
 				} else {
-					return nil, errors.New(fmt.Sprintf("input type %s is not found", fieldName))
+					return nil, fmt.Errorf("input type %s is not found", fieldName)
 				}
 			}
 		case *ast.DirectiveDefinition:
@@ -336,11 +367,10 @@ func (g *GraphqlParser) AstAsSchemaConfig(nodes []ast.Node, opts ...TypeNameMapO
 					}
 				}
 			} else {
-				return nil, errors.New(fmt.Sprintf("directive %s is not found", name))
+				return nil, fmt.Errorf("directive %s is not found", name)
 			}
 		default:
-
-			return nil, errors.New(fmt.Sprintf("%+v", o))
+			return nil, fmt.Errorf("%+v", o)
 		}
 	}
 	schemaConfig := SchemaConfig{}

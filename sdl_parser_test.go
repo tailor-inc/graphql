@@ -71,14 +71,26 @@ type Hello {
 	world: String
 }
 
+extend type Hello {
+	extend: String
+}
+
 type Query {
 	hello: Hello
     test: Test
 	tests(page: Int!, limit: Int!, query: TestQuery): [Test!]!
 }
 
+extend type Query {
+	testExtend: Test
+}
+
 type Mutation {
     create(name: String, need: Int!): Test
+}
+
+extend type Mutation {
+    update(id: ID!, name: String, need: Int!): Test
 }
 `
 	schema, err := ParseSDL(sdl, func(name, field string) FieldResolveFn {
@@ -109,6 +121,12 @@ type Mutation {
 	assert.Len(t, schema.TypeMap(), 22)
 	assert.Equal(t, "Description for TestQuery", schema.Type("TestQuery").Description())
 	assert.Equal(t, "Description for i", schema.Type("TestQuery").(*InputObject).Fields()["i"].Description())
+	// extend type
+	assert.Equal(t, "String", schema.Type("Hello").(*Object).Fields()["extend"].Type.Name())
+	assert.Equal(t, "Test", schema.Type("Query").(*Object).Fields()["test"].Type.Name())
+	assert.Equal(t, "Test", schema.Type("Query").(*Object).Fields()["testExtend"].Type.Name())
+	assert.Equal(t, "Test", schema.Type("Mutation").(*Object).Fields()["create"].Type.Name())
+	assert.Equal(t, "Test", schema.Type("Mutation").(*Object).Fields()["update"].Type.Name())
 
 	query := `
 query Example {
