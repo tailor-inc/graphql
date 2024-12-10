@@ -47,19 +47,6 @@ type Var {
 
 union TestUnion = Foo | Var
 
-type Test {
-	id: ID
-	i: Int
-	f: Float
-	b: Boolean
-	s: String
-	u: TestUnion
-	arr: [String]
-	ni: Int!
-	parent: Test
-	enum: TestEnum
-}
-
 """Description for TestQuery"""
 input TestQuery {
 	"""Description for i"""
@@ -91,6 +78,19 @@ type Mutation {
 
 extend type Mutation {
     update(id: ID!, name: String, need: Int!): Test
+}
+
+type Test {
+	id: ID
+	i: Int
+	f: Float
+	b: Boolean
+	s: String
+	u: TestUnion
+	arr: [String]
+	ni: Int!
+	parent: Test
+	enum: TestEnum
 }
 `
 	schema, err := ParseSDL(sdl, func(name, field string) FieldResolveFn {

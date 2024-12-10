@@ -180,7 +180,7 @@ func unisonResolver(p ResolveTypeParams) *Object {
 }
 
 func (g *GraphqlParser) AstAsSchemaConfig(nodes []ast.Node, opts ...TypeNameMapOption) (*SchemaConfig, error) {
-	var hasFields []ast.Node
+	var checkHasFields []ast.Node
 	for _, def := range nodes {
 		switch o := def.(type) {
 		case *ast.ScalarDefinition:
@@ -221,7 +221,7 @@ func (g *GraphqlParser) AstAsSchemaConfig(nodes []ast.Node, opts ...TypeNameMapO
 				Types:       g.unionTypeMap[name],
 				ResolveType: unisonResolver,
 			})
-			hasFields = append(hasFields, o)
+			checkHasFields = append(checkHasFields, o)
 		case *ast.ObjectDefinition:
 			name := o.Name.Value
 			g.typeFieldMap[name] = Fields{}
@@ -233,39 +233,15 @@ func (g *GraphqlParser) AstAsSchemaConfig(nodes []ast.Node, opts ...TypeNameMapO
 				Directives:  g.fieldDirectiveMap[name],
 			})
 			if len(o.Fields) > 0 {
-				hasFields = append(hasFields, o)
+				checkHasFields = append(checkHasFields, o)
 			}
 		case *ast.TypeExtensionDefinition:
 			name := o.Definition.Name.Value
 			if _, ok := g.typeMap[name]; !ok {
 				return nil, fmt.Errorf("type %s is not found", name)
 			}
-			for _, field := range o.Definition.Fields {
-				fieldName := field.Name.Value
-				if t, ok := g.typeFieldMap[name]; ok {
-					type_, err := g.asType(field.Type)
-					if err != nil {
-						return nil, err
-					}
-					args, err := g.asFieldConfigArgs(field.Arguments)
-					if err != nil {
-						return nil, err
-					}
-					directives, err := g.asObjectDirectives(field.Directives)
-					if err != nil {
-						return nil, err
-					}
-					t[fieldName] = &Field{
-						Name:        fieldName,
-						Args:        args,
-						Type:        type_,
-						Directives:  directives,
-						Description: asString(field.Description),
-						Resolve:     g.sdlResolver(name, fieldName),
-					}
-				} else {
-					return nil, fmt.Errorf("type %s is not found", fieldName)
-				}
+			if len(o.Definition.Fields) > 0 {
+				checkHasFields = append(checkHasFields, o.Definition)
 			}
 		case *ast.InputObjectDefinition:
 			name := o.Name.Value
@@ -276,7 +252,7 @@ func (g *GraphqlParser) AstAsSchemaConfig(nodes []ast.Node, opts ...TypeNameMapO
 				Description: asString(o.Description),
 			})
 			if len(o.Fields) > 0 {
-				hasFields = append(hasFields, o)
+				checkHasFields = append(checkHasFields, o)
 			}
 		case *ast.DirectiveDefinition:
 			name := o.Name.Value
@@ -289,12 +265,12 @@ func (g *GraphqlParser) AstAsSchemaConfig(nodes []ast.Node, opts ...TypeNameMapO
 				Locations:   locations,
 			})
 			if len(o.Arguments) > 0 {
-				hasFields = append(hasFields, o)
+				checkHasFields = append(checkHasFields, o)
 			}
 		}
 	skip:
 	}
-	for _, def := range hasFields {
+	for _, def := range checkHasFields {
 		switch o := def.(type) {
 		case *ast.ObjectDefinition:
 			name := o.Name.Value
