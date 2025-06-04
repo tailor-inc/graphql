@@ -1,0 +1,19 @@
+name: validate Renovate config
+
+on:
+  pull_request:
+    paths:
+      - renovate.json
+      - .github/workflows/validate_renovate_config.yml
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - uses: suzuki-shunsuke/renovate-config-validator-action@51b62d3bf0c86d4de68c580a057c1e16f0702d07 # v0.0.1
+        with:
+          node-version: 22.13.1
