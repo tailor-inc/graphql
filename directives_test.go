@@ -514,3 +514,86 @@ func TestDirectivesWorksWithSkipAndIncludeDirectives_NoIncludeOrSkip(t *testing.
 		t.Fatalf("Unexpected result, Diff: %v", testutil.Diff(expected, result))
 	}
 }
+
+func TestDirectives_ExternalDirective(t *testing.T) {
+	directive := graphql.ExternalDirective
+
+	if directive.Name != "external" {
+		t.Fatalf("Expected directive name to be 'external', got: %v", directive.Name)
+	}
+
+	expectedDescription := "The @external directive is used to mark a field as owned by another service. This allows you to extend a type from another service without taking ownership of the field."
+	if directive.Description != expectedDescription {
+		t.Fatalf("Expected directive description to match, got: %v", directive.Description)
+	}
+
+	expectedLocations := []string{graphql.DirectiveLocationFieldDefinition}
+	if len(directive.Locations) != len(expectedLocations) {
+		t.Fatalf("Expected %d locations, got: %d", len(expectedLocations), len(directive.Locations))
+	}
+
+	for i, location := range expectedLocations {
+		if directive.Locations[i] != location {
+			t.Fatalf("Expected location %d to be %v, got: %v", i, location, directive.Locations[i])
+		}
+	}
+
+	if len(directive.Args) != 0 {
+		t.Fatalf("Expected external directive to have no arguments, got: %d", len(directive.Args))
+	}
+}
+
+func TestDirectives_ExtendsDirective(t *testing.T) {
+	directive := graphql.ExtendsDirective
+
+	if directive.Name != "extends" {
+		t.Fatalf("Expected directive name to be 'extends', got: %v", directive.Name)
+	}
+
+	expectedDescription := "The @extends directive is used to represent type extensions in the schema. It allows subgraphs to extend types defined in other subgraphs."
+	if directive.Description != expectedDescription {
+		t.Fatalf("Expected directive description to match, got: %v", directive.Description)
+	}
+
+	expectedLocations := []string{graphql.DirectiveLocationObject, graphql.DirectiveLocationInterface}
+	if len(directive.Locations) != len(expectedLocations) {
+		t.Fatalf("Expected %d locations, got: %d", len(expectedLocations), len(directive.Locations))
+	}
+
+	for i, location := range expectedLocations {
+		if directive.Locations[i] != location {
+			t.Fatalf("Expected location %d to be %v, got: %v", i, location, directive.Locations[i])
+		}
+	}
+
+	if len(directive.Args) != 0 {
+		t.Fatalf("Expected extends directive to have no arguments, got: %d", len(directive.Args))
+	}
+}
+
+func TestDirectives_FederationDirectives(t *testing.T) {
+	directives := graphql.FederationDirectives
+
+	expectedCount := 10 // external, extends, requires, provides, key, link, shareable, override, inaccessible, composeDirective
+	if len(directives) != expectedCount {
+		t.Fatalf("Expected %d federation directives, got: %d", expectedCount, len(directives))
+	}
+
+	// Check that external and extends are included
+	var foundExternal, foundExtends bool
+	for _, directive := range directives {
+		if directive.Name == "external" {
+			foundExternal = true
+		}
+		if directive.Name == "extends" {
+			foundExtends = true
+		}
+	}
+
+	if !foundExternal {
+		t.Fatal("Expected external directive to be in FederationDirectives")
+	}
+	if !foundExtends {
+		t.Fatal("Expected extends directive to be in FederationDirectives")
+	}
+}
