@@ -165,3 +165,79 @@ query Example {
 	t.Log(result)
 
 }
+
+func TestParseSDL_FederationDirectives(t *testing.T) {
+	sdl := `
+	directive @external on FIELD_DEFINITION
+	directive @extends on OBJECT | INTERFACE
+	
+	type User @extends {
+		id: ID! @external
+		name: String
+		email: String @external
+	}
+	
+	type Product {
+		id: ID!
+		name: String
+		user: User
+	}
+	`
+
+	doc, err := parser.Parse(parser.ParseParams{
+		Source: sdl,
+	})
+	assert.NoError(t, err)
+
+	// Check that directives are parsed correctly
+	var externalDirective, extendsDirective *ast.DirectiveDefinition
+	var userType *ast.ObjectDefinition
+
+	for _, def := range doc.Definitions {
+		switch node := def.(type) {
+		case *ast.DirectiveDefinition:
+			if node.Name.Value == "external" {
+				externalDirective = node
+			}
+			if node.Name.Value == "extends" {
+				extendsDirective = node
+			}
+		case *ast.ObjectDefinition:
+			if node.Name.Value == "User" {
+				userType = node
+			}
+		}
+	}
+
+	assert.NotNil(t, externalDirective, "external directive should be parsed")
+	assert.Equal(t, "external", externalDirective.Name.Value)
+	assert.Equal(t, 1, len(externalDirective.Locations))
+	assert.Equal(t, "FIELD_DEFINITION", externalDirective.Locations[0].Value)
+
+	assert.NotNil(t, extendsDirective, "extends directive should be parsed")
+	assert.Equal(t, "extends", extendsDirective.Name.Value)
+	assert.Equal(t, 2, len(extendsDirective.Locations))
+
+	assert.NotNil(t, userType, "User type should be parsed")
+	assert.Equal(t, 1, len(userType.Directives), "User type should have extends directive")
+	assert.Equal(t, "extends", userType.Directives[0].Name.Value)
+
+	// Check fields with external directive
+	var idField, emailField *ast.FieldDefinition
+	for _, field := range userType.Fields {
+		if field.Name.Value == "id" {
+			idField = field
+		}
+		if field.Name.Value == "email" {
+			emailField = field
+		}
+	}
+
+	assert.NotNil(t, idField, "id field should exist")
+	assert.Equal(t, 1, len(idField.Directives), "id field should have external directive")
+	assert.Equal(t, "external", idField.Directives[0].Name.Value)
+
+	assert.NotNil(t, emailField, "email field should exist")
+	assert.Equal(t, 1, len(emailField.Directives), "email field should have external directive")
+	assert.Equal(t, "external", emailField.Directives[0].Name.Value)
+}

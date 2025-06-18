@@ -34,6 +34,23 @@ var SpecifiedDirectives = []*Directive{
 	DeprecatedDirective,
 }
 
+// AllDirectives The full list of specified directives plus Federation directives.
+var AllDirectives = append(SpecifiedDirectives, FederationDirectives...)
+
+// FederationDirectives The full list of Federation v2 directives.
+var FederationDirectives = []*Directive{
+	ExternalDirective,
+	ExtendsDirective,
+	RequiresDirective,
+	ProvidesDirective,
+	KeyDirective,
+	LinkDirective,
+	ShareableDirective,
+	OverrideDirective,
+	InaccessibleDirective,
+	ComposeDirective,
+}
+
 // Directive structs are used by the GraphQL runtime as a way of modifying execution
 // behavior. Type system creators will usually not create these directly.
 type Directive struct {
@@ -147,12 +164,24 @@ var DeprecatedDirective = NewDirective(DirectiveConfig{
 	},
 })
 
-// ExternalDirective
-// directive @external on FIELD_DEFINITION
+// ExternalDirective The @external directive is used to mark a field as owned by another service.
+// This allows you to extend a type from another service without taking ownership of the field.
 var ExternalDirective = NewDirective(DirectiveConfig{
-	Name: "external",
+	Name:        "external",
+	Description: "The @external directive is used to mark a field as owned by another service. This allows you to extend a type from another service without taking ownership of the field.",
 	Locations: []string{
 		DirectiveLocationFieldDefinition,
+	},
+})
+
+// ExtendsDirective The @extends directive is used to represent type extensions in the schema.
+// It allows subgraphs to extend types defined in other subgraphs.
+var ExtendsDirective = NewDirective(DirectiveConfig{
+	Name:        "extends",
+	Description: "The @extends directive is used to represent type extensions in the schema. It allows subgraphs to extend types defined in other subgraphs.",
+	Locations: []string{
+		DirectiveLocationObject,
+		DirectiveLocationInterface,
 	},
 })
 
