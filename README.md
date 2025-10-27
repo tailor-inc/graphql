@@ -60,6 +60,66 @@ func main() {
 	fmt.Printf("%s \n", rJSON) // {"data":{"hello":"world"}}
 }
 ```
+
+### Federation v2 Support
+
+This library supports GraphQL Federation v2 directives, including `@external` and `@extends`. Here's an example of how to use them:
+
+```go
+package main
+
+import (
+	"github.com/tailor-inc/graphql"
+)
+
+func main() {
+	// Define a type that extends a type from another service
+	userType := graphql.NewObject(graphql.ObjectConfig{
+		Name: "User",
+		Fields: graphql.Fields{
+			"id": &graphql.Field{
+				Type: graphql.NewNonNull(graphql.ID),
+				// This field is owned by another service
+				Directives: []*graphql.Directive{graphql.ExternalDirective},
+			},
+			"name": &graphql.Field{
+				Type: graphql.String,
+			},
+			"email": &graphql.Field{
+				Type: graphql.String,
+				// This field is also owned by another service
+				Directives: []*graphql.Directive{graphql.ExternalDirective},
+			},
+		},
+		// This type extends a type from another service
+		Directives: []*graphql.Directive{graphql.ExtendsDirective},
+	})
+
+	// Use Federation directives in your schema
+	schema, err := graphql.NewSchema(graphql.SchemaConfig{
+		Query: userType,
+		// Include Federation directives
+		Directives: append(graphql.SpecifiedDirectives, graphql.FederationDirectives...),
+	})
+	
+	if err != nil {
+		log.Fatalf("failed to create schema: %v", err)
+	}
+}
+```
+
+Available Federation v2 directives:
+- `@external` - Marks a field as owned by another service
+- `@extends` - Allows extending types from other services  
+- `@requires` - Specifies required fields for resolution
+- `@provides` - Specifies fields that will be provided
+- `@key` - Defines entity keys
+- `@shareable` - Allows fields to be resolved by multiple services
+- `@override` - Takes responsibility for a field from another service
+- `@inaccessible` - Marks fields as inaccessible to consumers
+- `@link` - Links to external schemas
+- `@composeDirective` - Preserves custom directives in supergraph
+
 For more complex examples, refer to the [examples/](https://github.com/tailor-inc/graphql/tree/master/examples/) directory and [graphql_test.go](https://github.com/tailor-inc/graphql/blob/master/graphql_test.go).
 
 ### Third Party Libraries
